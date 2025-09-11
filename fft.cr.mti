@@ -1,0 +1,15 @@
+C:/Users/nahom/OneDrive/Desktop/fft/test_fft.sv {1 {vlog -work work -sv -stats=none C:/Users/nahom/OneDrive/Desktop/fft/test_fft.sv
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module test_fft
+
+Top level modules:
+	test_fft
+
+} {} {}} C:/Users/nahom/OneDrive/Desktop/fft/fft.sv {1 {vlog -work work -sv -stats=none C:/Users/nahom/OneDrive/Desktop/fft/fft.sv
+Model Technology ModelSim - Intel FPGA Edition vlog 10.5b Compiler 2016.10 Oct  5 2016
+-- Compiling module fft
+
+Top level modules:
+	fft
+
+} {} {}}

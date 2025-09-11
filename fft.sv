@@ -1,0 +1,184 @@
+module fft(output logic [7:0] led,input logic [9:0] sw,clock,reset);
+
+logic  [7:0] Reb;
+logic  [7:0] Rea;
+
+logic [2:0] twiddle_index;
+logic signed [7:0] Rew;
+logic signed [7:0] Imw;
+
+//Storing the twiddle factors as a signed numbers
+
+logic signed [7:0] W [0:7][1:0] = '{
+    '{ 8'b01111111,  8'b00000000},  // W^0 = 1+0j
+    '{ 8'b01011011,  8'b10100101},  // W^1 = 0.707106 - 0.707106j 
+    '{ 8'b00000000,  8'b10000000},  // W^2 = 0 - j
+    '{ 8'b10100101,  8'b10100101},  // W^3 = -0.707106 - 0.707106j
+    '{ 8'b10000000,  8'b00000000},  // W^4 = -1 + oj
+    '{ 8'b10100101,  8'b01011011},  // W^5 = -0.707106 + 0.707106j
+    '{ 8'b00000000,  8'b01111111},  // W^6 = 0 + j
+    '{ 8'b01011011,  8'b01011011}   // W^7 = 0.707106 + 0.707106j
+};
+
+typedef enum {master_reset,twiddle_factor,wait_twiddle_factor,read_Reb,wait_read_Reb,read_Rea,wait_read_Rea,display_Imy,display_Rez,display_Imz} state; 
+
+
+state present_state,next_state;
+
+always_ff @ (posedge clock , negedge reset)
+begin
+if(!reset)
+    present_state <= master_reset;
+else
+    present_state <= next_state;
+end
+
+
+
+always_comb
+
+begin
+
+   unique case(present_state) 
+
+	master_reset:
+	begin
+	led = 8'b00000001;
+	if(sw[9] == 1)
+		begin
+		if(sw[8] == 1)
+			next_state = twiddle_factor;
+		end
+
+
+
+	end
+
+
+
+
+	twiddle_factor:
+	begin
+	led = 8'b00000010;
+
+
+	Rew = W[sw][0];
+        Imw = W[sw][1];
+
+	if(sw[8] == 0)
+		next_state = wait_twiddle_factor;
+
+	else
+		next_state = twiddle_factor;
+
+
+
+	end
+
+	
+	wait_twiddle_factor:
+	begin
+	led = 8'b00000011;
+	if(sw[8] == 1)
+		next_state = read_Reb;
+
+	else
+		next_state = wait_twiddle_factor;
+
+	end
+
+
+
+	read_Reb:
+	begin
+	led = 8'b00000100;
+
+	//Reb[7:0] = sw[7:0];
+
+	if(sw[8] == 0)
+		next_state = wait_read_Reb;
+
+	else
+		next_state = read_Reb;
+
+
+
+	end
+
+	wait_read_Reb:
+	begin
+	led = 8'b00000101;
+	if(sw[8] == 1)
+		next_state = read_Rea;
+
+	else
+		next_state = wait_read_Reb;
+
+	end
+
+
+	read_Rea:
+	begin
+	//rea[7:0] = sw [7:0];
+	led = 8'b00000111;
+	
+
+	//compute everything and display rey
+	
+	//led[7:0] = rey[7:0];
+	if(sw[8] == 0)
+	next_state = display_Imy;
+	
+
+
+	
+
+	end
+
+
+
+
+
+	display_Imy:
+	begin
+	led = 8'b00001000;
+	//led[7:0] = imy[7:0];
+	if(sw[8] == 1)
+	next_state = display_Rez;
+
+	end
+
+
+
+	display_Rez:
+	begin
+	//led[7:0] = rez[7:0];
+	led = 8'b00001001;
+	if(sw[8] == 0)
+	next_state = display_Imz;
+
+	end
+
+
+
+	display_Imz:
+	begin
+	led = 8'b00001010;
+	//led[7:0] = imz[7:0];
+	if(sw[8] == 1)
+	next_state = twiddle_factor;
+
+
+	end
+	
+
+	default:
+	begin
+	led = 8'b00000000;
+	next_state <= master_reset;
+	end
+   endcase
+
+end
+endmodule
+
